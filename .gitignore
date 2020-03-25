@@ -1,2 +1,5 @@
 # Project exclude paths
 /cmake-build-debug/
+/dist_tree.cpp
+/split_test.cpp
+/*.exe
