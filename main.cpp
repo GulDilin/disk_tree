@@ -2,6 +2,7 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <utility>
 using namespace std;
 
 struct Dir
@@ -11,47 +12,27 @@ struct Dir
 };
 
 void split(List<string> * splited, string str, char separator){
-    cout << "begin split" << endl;
-    string temp = str;
-    string sub;
-    while (temp.find_first_of(separator) >=0 && temp.find_first_of(separator) < temp.length())
+    size_t i;
+    while ((i = str.find_first_of(separator)) != string::npos)
     {
-        sub = temp.substr(0, temp.find_first_of(separator));
-        if (sub.length() > 0) splited->add(sub);
-        temp = temp.substr(temp.find_first_of(separator) + 1);
-
+        if (i > 0) splited->add(str.substr(0, i));
+        str = str.substr(i + 1);
     }
-    if (temp.length() > 0) splited->add(temp);
-    cout << "end split" << endl;
+    if (str.length() > 0) splited->add(str);
 }
 
 void show(List<Dir> * list, int level){
     if (list->size() == 0) return;
-    Dir temp;
-    List<Dir>::Iterator iterator = list->get_begin_iterator();
+    Dir tmp;
+    List<Dir>::Node * node = list->get_first();
 
-    while(iterator.has_next()){
-        temp = *iterator.next();
+    for (int j = 0; j < list->size(); ++j) {
+        tmp = node->item;
         for (int i = 0; i < level; ++i) cout << " ";
-        cout << temp.name << endl;
-        show((temp.dirs), level + 2);
+        cout << tmp.name << endl;
+        show((tmp.dirs), level + 2);
+        node = node->next;
     }
-}
-
-
-Dir * search_by_name(List<Dir> * list, string name)
-{
-    Dir *res = 0;
-    Dir *temp;
-    List<Dir>::Iterator iterator = list->get_begin_iterator();
-    while(iterator.has_next()){
-        temp = iterator.next();
-        if (temp->name == name){
-            res = temp;
-            break;
-        }
-    }
-    return res;
 }
 
 
@@ -63,82 +44,55 @@ int main(int argc, char const *argv[])
 
     string path;
     string name;
-    List<string> * splited = new List<string>();
+    auto * splited = new List<string>();
 
 
-    Dir *root = new Dir;
-    root->name = "root";
-    root->dirs = new List<Dir>;
+    Dir root;
+    root.name = "root";
+    root.dirs = new List<Dir>;
 
-
-    // root->name = "root";
-    // root->dirs = new List<Dir>();
-
-    // // root->dirs->add();
-
-    Dir* temp;
-    Dir* temp_pointer;
-    Dir* temp_root;
-
-    temp = new Dir;
-    temp->name = "temp1";
-    temp->dirs = new List<Dir>;
-    root->dirs->add(*temp);
-
-
-    temp_root = new Dir;
-    temp_root->name = "temp3";
-    temp_root->dirs = new List<Dir>;
-    temp->dirs->add(*temp_root);
-
-    temp_root = new Dir;
-    temp_root->name = "temp4";
-    temp_root->dirs = new List<Dir>;
-    temp->dirs->add(*temp_root);
-
-    temp = new Dir;
-    temp->name = "temp2";
-    temp->dirs = new List<Dir>;
-    root->dirs->add(*temp);
-
-    show(((*(root)).dirs), 0);
-
+    Dir temp_root;
 
     for (int i = 0; i < n; ++i)
     {
         cout << endl << i << " circle" << endl;
         cin >> path;
+
+        // split names by '/'
         splited->clear();
-
-        cout << "cleared" << endl;
         split(splited, path, '/');
-        cout << "splited: ";
-        splited->show();
 
-        List<string>::Iterator names = splited->get_begin_iterator();
-        cout << "created iterator: ";
         temp_root = root;
-        while(names.has_next()){
-            name = *(names.next());
-            cout << "name: " <<  name << endl;
-            temp = search_by_name(temp_root->dirs, name);
-            cout << "find pointer with that name: " << temp_pointer << endl;
+        List<string>::Node * node = splited->get_first();
 
-            if (temp == 0)
-            {
-                temp = new Dir;
-                temp->name = name;
-                temp->dirs = new List<Dir>();
-                cout << "before add" << endl;
+        // add all splitted dir names
+        for (int j = 0; j < splited->size(); ++j) {
+            name = node->item;
+            node = node->next;
 
-                temp_root->dirs->add(*temp);
-                cout << "added" << endl;
+            bool is_exist = false;
+            List<Dir>::Node * node1 = temp_root.dirs->get_first();
+
+            //search for directory with that name
+            for (int k = 0; k < temp_root.dirs->size(); ++k) {
+                if (node1->item.name == name){
+                    temp_root = node1->item;
+                    is_exist = true;
+                    break;
+                }
+                node1 = node1->next;
             }
-            temp_root = temp;
-            cout << "test" << endl;
-        }
 
+            //create dir if not exist
+            if (!(is_exist))
+            {
+                Dir tmp;
+                tmp.name = name;
+                tmp.dirs = new List<Dir>();
+                temp_root.dirs->add(tmp);
+                temp_root = tmp;
+            }
+        }
     }
-    cout << "show";
-    show((root->dirs), 0);
+    show((root.dirs), 0);
 }
