@@ -50,6 +50,54 @@ public:
         // delete first, last;
     }
 
+    void swap(int i, int k) {
+        if (i >= length || i < 0 || k >= length || k < 0 || i == k) return;
+        if (i > k) {
+            int t = i;
+            i = k;
+            k = t;
+        }
+        Node * node = first;
+        Node * node_i;
+        Node * node_k;
+        T *temp_item;
+        for (int j = 0; j < i; ++j) {
+            node = node->next;
+        }
+        node_i = node;
+        temp_item = node_i->item;
+        for (int l = i; l < k; ++l) {
+            node = node->next;
+        }
+        node_k = node;
+        node_i->item = node_k->item;
+        node_k->item = temp_item;
+    }
+
+    void swap(Node * n1, Node * n2){
+        if (n1 == n2) return;
+        T temp_item;
+        temp_item = n1->item;
+        n1->item = n2->item;
+        n2->item = temp_item;
+    }
+
+    void sort(){
+        int min = 0;
+        Node * min_node;
+        Node * node_i = first;
+        Node * node_j;
+        for (int i = 0; i < length; ++i) {
+            min_node = node_i;
+            node_j = node_i;
+            for (int j = i; j < length; ++j){
+                if (node_j->item < min_node->item) min_node = node_j;
+                node_j = node_j->next;
+            }
+            swap(node_i, min_node);
+            node_i = node_i->next;
+        }
+    }
 
     void show() {
         Node *temp = first;
@@ -200,47 +248,5 @@ public:
         last = first;
         length = 0;
     }
-
-    class Iterator {
-    public:
-        Iterator(Node *&f) {
-            tmp = new Node;
-            tmp->next = f;
-        }
-
-        ~Iterator() {
-            delete tmp;
-        }
-
-        bool has_next() {
-            return (tmp->next != 0);
-        }
-
-        T *next() {
-            tmp = tmp->next;
-            return &(tmp->item);
-        }
-
-        bool has_prev() {
-            return (tmp->prev != 0);
-        }
-
-        T *prev() {
-            tmp = tmp->prev;
-            return &(tmp->item);
-        }
-
-    private:
-        List::Node *tmp;
-    };
-
-    Iterator get_begin_iterator() {
-        return Iterator(first);
-    }
-
-    Iterator get_end_iterator() {
-        return Iterator(last);
-    }
-
 };
 

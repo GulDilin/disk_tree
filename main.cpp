@@ -2,13 +2,17 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
-#include <utility>
+#include <cstring>
 using namespace std;
 
 struct Dir
 {
     string name;
     List<Dir> * dirs;
+
+    friend bool operator < (const Dir &rhs, const Dir &lhs) {
+        return (strcmp(rhs.name.c_str(), lhs.name.c_str()) <0);
+    }
 };
 
 void split(List<string> * splited, string str, char separator){
@@ -30,7 +34,18 @@ void show(List<Dir> * list, int level){
         tmp = node->item;
         for (int i = 0; i < level; ++i) cout << " ";
         cout << tmp.name << endl;
-        show((tmp.dirs), level + 2);
+        show((tmp.dirs), level + 1);
+        node = node->next;
+    }
+}
+
+void sort(List<Dir> * list){
+    if (list->size() == 0) return;
+    list -> sort();
+    List<Dir>::Node * node = list->get_first();
+
+    for (int j = 0; j < list->size(); ++j) {
+        sort(node->item.dirs);
         node = node->next;
     }
 }
@@ -52,15 +67,13 @@ int main(int argc, char const *argv[])
     root.dirs = new List<Dir>;
 
     Dir temp_root;
-
     for (int i = 0; i < n; ++i)
     {
-        cout << endl << i << " circle" << endl;
         cin >> path;
 
         // split names by '/'
         splited->clear();
-        split(splited, path, '/');
+        split(splited, path, '\\');
 
         temp_root = root;
         List<string>::Node * node = splited->get_first();
@@ -94,5 +107,6 @@ int main(int argc, char const *argv[])
             }
         }
     }
+    sort((root.dirs));
     show((root.dirs), 0);
 }
